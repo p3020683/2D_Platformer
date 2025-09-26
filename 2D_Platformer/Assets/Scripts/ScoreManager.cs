@@ -1,8 +1,8 @@
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour {
-    public TextMeshProUGUI m_ScoreText;
+    public Text m_ScoreText;
     int m_Score;
 
     void Start() {
