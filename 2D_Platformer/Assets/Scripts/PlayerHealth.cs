@@ -1,4 +1,6 @@
+using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour {
     public int m_MaxHp = 3;
@@ -15,7 +17,10 @@ public class PlayerHealth : MonoBehaviour {
     void Kill() {
         m_Alive = false;
         Debug.Log("Player died"); // should be actual UI
-        // should have delay or await button
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+        // should have delay or await user interaction
+        Respawn();
+    }
+    void Respawn() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
