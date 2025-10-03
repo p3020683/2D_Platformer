@@ -37,6 +37,5 @@ public class PlayerController : MonoBehaviour {
         if (m_Jumps < m_JumpsMax && collision.gameObject.CompareTag("Ground")) {
             m_Jumps = m_JumpsMax;
         }
-        Debug.Log(DashCd);
     }
 }
