@@ -11,7 +11,7 @@ public class Hazard : MonoBehaviour {
     Rigidbody2D m_PlayerRb;
 
     void Start() {
-        GameObject m_Player = GameObject.FindGameObjectWithTag("Player");
+        m_Player = GameObject.FindGameObjectWithTag("Player");
         m_PlayerHealth = m_Player.GetComponent<PlayerHealth>();
         if (m_KnockBack) { m_PlayerRb = m_Player.GetComponent<Rigidbody2D>(); }
     }
