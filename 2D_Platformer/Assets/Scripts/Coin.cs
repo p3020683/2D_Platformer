@@ -4,7 +4,6 @@ public class Coin : MonoBehaviour {
     public int m_Value = 1;
 
     private void OnTriggerEnter2D(Collider2D collision) {
-        Debug.Log("ontrigenter2d");
         // Only trigger if the player touches the coin
         if (collision.gameObject.CompareTag("Player")) {
             // Find the ScoreManager and add points

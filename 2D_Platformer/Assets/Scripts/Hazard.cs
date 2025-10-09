@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class Hazard : MonoBehaviour {
     public int m_Damage = 1;
-    public bool m_KnockBack = true;
-    public bool m_InstaKill = false;
-    public bool m_OneShot = false;
+    public int m_KnockbackPwr = 0;
+    public int m_Durability = 0;
+    public bool m_Instakill = false;
 
     GameObject m_Player;
     PlayerHealth m_PlayerHealth;
@@ -13,18 +13,18 @@ public class Hazard : MonoBehaviour {
     void Start() {
         m_Player = GameObject.FindGameObjectWithTag("Player");
         m_PlayerHealth = m_Player.GetComponent<PlayerHealth>();
-        if (m_KnockBack) { m_PlayerRb = m_Player.GetComponent<Rigidbody2D>(); }
+        m_PlayerRb = m_Player.GetComponent<Rigidbody2D>();
     }
     private void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Player")) {
-            if (m_KnockBack) {
+            if (m_KnockbackPwr > 0) {
                 m_PlayerRb.AddForce(
-                    (m_Player.transform.position - transform.position).normalized * 10f,
+                    (m_Player.transform.position - transform.position).normalized * m_KnockbackPwr,
                     ForceMode2D.Impulse);
             }
-            if (m_InstaKill) { m_PlayerHealth.Kill(); }
+            if (m_Instakill) { m_PlayerHealth.Kill(); }
             else { m_PlayerHealth.Damage(m_Damage); }
-            if (m_OneShot) { Destroy(gameObject); }
+            if (m_Durability != 0 && --m_Durability <= 0) { Destroy(gameObject); }
         }
     }
 }

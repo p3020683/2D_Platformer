@@ -6,8 +6,8 @@ public class PlayerHealth : MonoBehaviour {
     public int m_MaxHp = 3;
     public Vector3 m_RespawnPoint = Vector3.zero;
     public Text m_HealthText;
+    public Text m_DeathText;
     int m_Hp;
-    // bool m_Alive = true;
 
     void Start() {
         SetHp(m_MaxHp);
@@ -25,13 +25,13 @@ public class PlayerHealth : MonoBehaviour {
     }
     public void Kill() {
         if (m_Hp > 0) { SetHp(0); }
-        // m_Alive = false;
-        Debug.Log("Player died"); // should be actual UI
-        // should have delay or await user interaction
-        Respawn();
+        m_DeathText.gameObject.SetActive(true);
+        Invoke("Respawn", 1);
     }
     void Respawn() {
         gameObject.transform.position = m_RespawnPoint;
+        gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        m_DeathText.gameObject.SetActive(false);
         SetHp(m_MaxHp);
     }
     void Reload() {
