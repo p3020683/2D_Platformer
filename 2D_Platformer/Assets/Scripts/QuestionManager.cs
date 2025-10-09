@@ -3,10 +3,8 @@ using UnityEngine.UI;
 using UnityEngine;
 
 public class QuestionManager : MonoBehaviour {
-    public int m_LhsMin = 1;
-    public int m_LhsMax = 10;
-    public int m_RhsMin = 1;
-    public int m_RhsMax = 10;
+    public Vector2Int m_LhsRange = new(1, 10);
+    public Vector2Int m_RhsRange = new(1, 10);
     public bool m_Add = true;
     public bool m_Sub = true;
     public bool m_Mul = false;
@@ -16,59 +14,64 @@ public class QuestionManager : MonoBehaviour {
 
     int[] m_Answers;
 
-    enum Operand { Add, Sub, Mul, Div };
+    enum Operator { Add, Sub, Mul, Div };
 
-    int RandRange(bool side) {
-        // bool side arg: false = lhs, true = rhs
-        int min = side ? m_RhsMin : m_LhsMin;
-        int max = side ? m_RhsMax : m_LhsMax;
+    int RandOperand(bool side) {
+        int min = side ? m_RhsRange.x : m_LhsRange.x;
+        int max = side ? m_RhsRange.y : m_LhsRange.y;
         return Random.Range(min, max);
     }
-    Operand RandOperand() {
-        Operand? op = null;
+    Operator RandOperator() {
+        Operator? op = null;
         while (op == null) {
-            op = (Operand)Random.Range(0, System.Enum.GetNames(typeof(Operand)).Length);
+            op = (Operator)Random.Range(0, System.Enum.GetNames(typeof(Operator)).Length);
             switch (op) {
-                case Operand.Add: if (!m_Add) { op = null; } break;
-                case Operand.Sub: if (!m_Sub) { op = null; } break;
-                case Operand.Mul: if (!m_Mul) { op = null; } break;
-                case Operand.Div: if (!m_Div) { op = null; } break;
-                default: throw new System.Exception("Unexpected Operand value");
+                case Operator.Add: if (!m_Add) { op = null; } break;
+                case Operator.Sub: if (!m_Sub) { op = null; } break;
+                case Operator.Mul: if (!m_Mul) { op = null; } break;
+                case Operator.Div: if (!m_Div) { op = null; } break;
+                default: throw new System.Exception("Unexpected Operator op value");
             }
         }
-        return (Operand)op;
+        return (Operator)op;
     }
-    int EvalQuestion(int lhs, int rhs, Operand op) {
+    int EvalQuestion(int lhs, int rhs, Operator op) {
         switch (op) {
-            case Operand.Add: return lhs + rhs;
-            case Operand.Sub: return lhs - rhs;
-            case Operand.Mul: return lhs * rhs;
-            case Operand.Div: return lhs / rhs;
-            default: throw new System.Exception("Unexpected Operand value");
+            case Operator.Add: return lhs + rhs;
+            case Operator.Sub: return lhs - rhs;
+            case Operator.Mul: return lhs * rhs;
+            case Operator.Div: return lhs / rhs;
+            default: throw new System.Exception("Unexpected Operator op value");
         }
     }
-    char OperandRepr(Operand op) {
+    char OperandRepr(Operator op) {
         switch (op) {
-            case Operand.Add: return '+';
-            case Operand.Sub: return '-';
-            case Operand.Mul: return '*';
-            case Operand.Div: return '/';
-            default: throw new System.Exception("Unexpected Operand value");
+            case Operator.Add: return '+';
+            case Operator.Sub: return '-';
+            case Operator.Mul: return '*';
+            case Operator.Div: return '/';
+            default: throw new System.Exception("Unexpected Operator op value");
         }
     }
-    System.Tuple<string, int> GenQuestion(Operand? operand = null) {
-        int lhs = RandRange(false);
-        int rhs = RandRange(true);
-        Operand op = (operand == null) ? RandOperand() : (Operand)operand;
+    string FormatQuestion(int lhs, int rhs, Operator op) {
+        return $"{lhs} {OperandRepr(op)} {rhs}";
+    }
+    int[] GenQuestion(Operator? opArg = null) {
+        int lhs = RandOperand(false);
+        int rhs = RandOperand(true);
+        Operator op = (opArg == null) ? RandOperator() : (Operator)opArg;
         int answer = EvalQuestion(lhs, rhs, op);
-        return new($"{lhs} {OperandRepr(op)} {rhs}", answer);
+        return new int[] { lhs, rhs, (int)op, answer };
     }
-    void NewQuestion() {
-        System.Tuple<string, int> question = GenQuestion();
-        m_QuestionText.text = $"What is {question.Item1}?";
-        m_Answers = new int[] { question.Item2 };
+    public void NewQuestion() {
+        int[] question = GenQuestion();
+        m_QuestionText.text = $"What is {FormatQuestion(question[0], question[1], (Operator)question[2])}?";
+        m_Answers = new int[] { question[3] };
         for (int i = 0; i < m_AnswerCount; ++i) {
-            m_Answers.Append<int>(GenQuestion().Item2);
+            m_Answers.Append(GenQuestion((Operator)question[2])[3]);
         }
+
+        Debug.Log(m_Answers.Length);
+        Debug.Log(m_Answers.ToString());
     }
 }
