@@ -8,19 +8,17 @@ public class Hazard : MonoBehaviour {
 
     GameObject m_Player;
     PlayerHealth m_PlayerHealth;
-    Rigidbody2D m_PlayerRb;
+    PlayerController m_PlayerController;
 
     void Start() {
         m_Player = GameObject.FindGameObjectWithTag("Player");
         m_PlayerHealth = m_Player.GetComponent<PlayerHealth>();
-        m_PlayerRb = m_Player.GetComponent<Rigidbody2D>();
+        m_PlayerController = m_Player.GetComponent<PlayerController>();
     }
-    private void OnCollisionEnter2D(Collision2D collision) {
+    void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Player")) {
             if (m_KnockbackPwr > 0) {
-                m_PlayerRb.AddForce(
-                    (m_Player.transform.position - transform.position).normalized * m_KnockbackPwr,
-                    ForceMode2D.Impulse);
+                m_PlayerController.Knockback = (m_Player.transform.position - transform.position).normalized * m_KnockbackPwr;
             }
             if (m_Instakill) { m_PlayerHealth.Kill(); }
             else { m_PlayerHealth.Damage(m_Damage); }

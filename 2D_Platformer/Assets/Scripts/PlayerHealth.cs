@@ -8,9 +8,11 @@ public class PlayerHealth : MonoBehaviour {
     public Text m_HealthText;
     public Text m_DeathText;
     int m_Hp;
+    PlayerController m_Controller;
 
     void Start() {
         SetHp(m_MaxHp);
+        m_Controller = GetComponent<PlayerController>();
     }
     void UpdateHealthUI() {
         m_HealthText.text = m_Hp + " HP";
@@ -26,11 +28,14 @@ public class PlayerHealth : MonoBehaviour {
     public void Kill() {
         if (m_Hp > 0) { SetHp(0); }
         m_DeathText.gameObject.SetActive(true);
+        m_Controller.m_CaptureInput = false;
+        m_Controller.ResetPhysicsCache();
         Invoke("Respawn", 1);
     }
     void Respawn() {
         gameObject.transform.position = m_RespawnPoint;
         gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        m_Controller.m_CaptureInput = true;
         m_DeathText.gameObject.SetActive(false);
         SetHp(m_MaxHp);
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,8 +9,9 @@ public class QuestionManager : MonoBehaviour {
     public GameObject[] m_AnswerBoxes;
     public Text m_QuestionText;
     public ScoreManager m_ScoreManager;
-    [NonSerialized] public int[] m_Answers;
-    int m_Difficulty = 1;
+    [NonSerialized] public int m_Answer;
+    int[] m_Answers;
+    float m_Difficulty = 1;
 
     enum Operator { Add, Sub, Mul, Div };
 
@@ -29,10 +29,11 @@ public class QuestionManager : MonoBehaviour {
         }
     };
 
-    int RandOperand(bool side) {
-        int min = side ? m_RhsRange.x : m_LhsRange.x;
-        int max = side ? m_RhsRange.y : m_LhsRange.y;
-        return UnityEngine.Random.Range(min, max);
+    void Start() {
+        NewQuestion();
+    }
+    int RandOperand(Vector2Int range) {
+        return UnityEngine.Random.Range(range.x, range.y);
     }
     Operator RandOperator() {
         int enumLength = Enum.GetNames(typeof(Operator)).Length;
@@ -71,43 +72,50 @@ public class QuestionManager : MonoBehaviour {
         return $"{lhs} {OperandRepr(op)} {rhs}";
     }
     Equation GenEquation(Operator? opArg = null) {
-        int lhs = RandOperand(false);
-        int rhs = RandOperand(true);
-        Operator op = (opArg == null) ? RandOperator() : (Operator)opArg;
+        int lhs, rhs;
+        Operator op;
+        do {
+            lhs = RandOperand(m_LhsRange);
+            rhs = RandOperand(m_RhsRange);
+            op = (opArg == null) ? RandOperator() : (Operator)opArg;
+        } while (op == Operator.Div && (rhs == 0 || lhs % rhs != 0 || lhs <= rhs));
         int answer = EvalQuestion(lhs, rhs, op);
         return new(lhs, rhs, answer, op);
     }
-    void DistributeAnswers() {
-        int[] arr = m_Answers;
+    void ShuffleAnswers() {
         System.Random random = new();
-        int n = arr.Length;
+        int n = m_Answers.Length;
         while (n > 1) {
             int k = random.Next(n--);
-            int temp = arr[n];
-            arr[n] = arr[k];
-            arr[k] = temp;
+            int temp = m_Answers[n];
+            m_Answers[n] = m_Answers[k];
+            m_Answers[k] = temp;
         }
         for (int i = 0; i < m_AnswerBoxes.Length; ++i) {
-            m_AnswerBoxes[i].GetComponent<Answer>().SetNumber(arr[i]);
+            m_AnswerBoxes[i].GetComponent<Answer>().SetNumber(m_Answers[i]);
         }
+    }
+    void ApplyDifficulty(float diffDelta) {
+        m_Difficulty = Mathf.Clamp(m_Difficulty + diffDelta, 1, 5);
+        m_LhsRange = Vector2Int.RoundToInt((Vector2)m_LhsRange * m_Difficulty);
+        m_RhsRange = Vector2Int.RoundToInt((Vector2)m_RhsRange * m_Difficulty);
     }
     public void NewQuestion() {
         Equation eq = GenEquation();
         m_QuestionText.text = $"What is {FormatQuestion(eq.lhs, eq.rhs, eq.op)}?";
-        int answerCount = m_AnswerBoxes.Length;
+        int answerCount = m_AnswerBoxes.Length > 0 ? m_AnswerBoxes.Length : throw new ArgumentException("AnswerBox reference(s) not provided.");
         m_Answers = new int[answerCount];
-        m_Answers[0] = eq.answer;
+        m_Answers[0] = m_Answer = eq.answer;
         for (int i = 1; i < answerCount; ++i) {
             m_Answers[i] = GenEquation(eq.op).answer;
         }
-        DistributeAnswers();
+        ShuffleAnswers();
     }
     public void OnAnswer(int number) {
-        if (number == m_Answers[0]) {
-            m_ScoreManager.AddScore(2);
-        }
-        else {
-            m_ScoreManager.AddScore(-1);
-        }
+        int scoreDelta = number == m_Answer ? 2 : -1;
+        float diffDelta = number == m_Answer ? 0.5f : -0.5f;
+        m_ScoreManager.AddScore(scoreDelta);
+        ApplyDifficulty(diffDelta);
+        NewQuestion();
     }
 }
