@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Obsolete("Use newer EquationManager")]
 public class QuestionManager : MonoBehaviour {
     [SerializeField] Vector2Int _lhsRange = new(1, 10);
     [SerializeField] Vector2Int _rhsRange = new(1, 10);
