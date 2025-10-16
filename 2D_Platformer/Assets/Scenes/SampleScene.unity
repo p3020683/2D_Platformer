@@ -357,6 +357,7 @@ MonoBehaviour:
   m_RespawnPoint: {x: 0, y: 0, z: 0}
   m_HealthText: {fileID: 1503098594}
   m_DeathText: {fileID: 478269279}
+  m_QuestionManager: {fileID: 313743188}
 --- !u!1 &313743185
 GameObject:
   m_ObjectHideFlags: 0

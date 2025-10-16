@@ -7,6 +7,7 @@ public class PlayerHealth : MonoBehaviour {
     public Vector3 m_RespawnPoint = Vector3.zero;
     public Text m_HealthText;
     public Text m_DeathText;
+    public QuestionManager m_QuestionManager;
     int m_Hp;
     PlayerController m_Controller;
 
@@ -37,6 +38,7 @@ public class PlayerHealth : MonoBehaviour {
         gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
         m_Controller.m_CaptureInput = true;
         m_DeathText.gameObject.SetActive(false);
+        m_QuestionManager.NewQuestion();
         SetHp(m_MaxHp);
     }
     void Reload() {

@@ -14,6 +14,7 @@ public class QuestionManager : MonoBehaviour {
     float m_Difficulty = 1;
 
     enum Operator { Add, Sub, Mul, Div };
+    enum VarPos { Lhs, Rhs, Answer };
 
     [Serializable] struct OperatorFlags {
         public bool add, sub, mul, div;
@@ -24,8 +25,9 @@ public class QuestionManager : MonoBehaviour {
     struct Equation {
         public int lhs, rhs, answer;
         public Operator op;
-        public Equation(int lhs, int rhs, int answer, Operator op) {
-            this.lhs = lhs; this.rhs = rhs; this.answer = answer; this.op = op;
+        public VarPos varPos;
+        public Equation(int lhs, int rhs, int answer, Operator op, VarPos varPos) {
+            this.lhs = lhs; this.rhs = rhs; this.answer = answer; this.op = op; this.varPos = varPos;
         }
     };
 
@@ -40,38 +42,58 @@ public class QuestionManager : MonoBehaviour {
         Operator? op = null;
         while (op == null) {
             op = (Operator)UnityEngine.Random.Range(0, enumLength);
-            switch (op) {
-                case Operator.Add: if (!m_OpFlags.add) { op = null; } break;
-                case Operator.Sub: if (!m_OpFlags.sub) { op = null; } break;
-                case Operator.Mul: if (!m_OpFlags.mul) { op = null; } break;
-                case Operator.Div: if (!m_OpFlags.div) { op = null; } break;
-                default: throw new Exception("Unexpected Operator op value");
-            }
+            op = op switch {
+                Operator.Add => m_OpFlags.add ? op : null,
+                Operator.Sub => m_OpFlags.sub ? op : null,
+                Operator.Mul => m_OpFlags.mul ? op : null,
+                Operator.Div => m_OpFlags.div ? op : null,
+                _ => throw new Exception("Unexpected Operator value")
+            };
         }
         return (Operator)op;
     }
-    int EvalQuestion(int lhs, int rhs, Operator op) {
-        switch (op) {
-            case Operator.Add: return lhs + rhs;
-            case Operator.Sub: return lhs - rhs;
-            case Operator.Mul: return lhs * rhs;
-            case Operator.Div: return lhs / rhs;
-            default: throw new Exception("Unexpected Operator op value");
-        }
+    int EvalEquation(Equation eq) {
+        return eq.varPos switch {
+            VarPos.Lhs => eq.op switch {
+                Operator.Add => eq.answer - eq.rhs,
+                Operator.Sub => eq.answer + eq.rhs,
+                Operator.Mul => eq.answer / eq.rhs,
+                Operator.Div => eq.answer * eq.rhs,
+                _ => throw new Exception("Unexpected Operator value")
+            },
+            VarPos.Rhs => eq.op switch {
+                Operator.Add => eq.answer - eq.lhs,
+                Operator.Sub => eq.lhs - eq.answer,
+                Operator.Mul => eq.answer / eq.lhs,
+                Operator.Div => eq.lhs / eq.answer,
+                _ => throw new Exception("Unexpected Operator value")
+            },
+            VarPos.Answer => eq.op switch {
+                Operator.Add => eq.lhs + eq.rhs,
+                Operator.Sub => eq.lhs - eq.rhs,
+                Operator.Mul => eq.lhs * eq.rhs,
+                Operator.Div => eq.lhs / eq.rhs,
+                _ => throw new Exception("Unexpected Operator value")
+            },
+            _ => throw new Exception("Unexpected VarPos value")
+        };
     }
     char OperandRepr(Operator op) {
-        switch (op) {
-            case Operator.Add: return '+';
-            case Operator.Sub: return '-';
-            case Operator.Mul: return '*';
-            case Operator.Div: return '/';
-            default: throw new Exception("Unexpected Operator op value");
-        }
+        return op switch {
+            Operator.Add => '+',
+            Operator.Sub => '-',
+            Operator.Mul => '*',
+            Operator.Div => '/',
+            _ => throw new Exception("Unexpected Operator value")
+        };
     }
-    string FormatQuestion(int lhs, int rhs, Operator op) {
-        return $"{lhs} {OperandRepr(op)} {rhs}";
+    string FormatEquation(Equation eq) {
+        string lhsStr = eq.varPos == VarPos.Lhs ? "x" : eq.lhs.ToString();
+        string rhsStr = eq.varPos == VarPos.Rhs ? "x" : eq.rhs.ToString();
+        string answerStr = eq.varPos == VarPos.Answer ? "x" : eq.answer.ToString();
+        return $"{lhsStr} {OperandRepr(eq.op)} {rhsStr} = {answerStr}";
     }
-    Equation GenEquation(Operator? opArg = null) {
+    Equation GenEquation(Operator? opArg = null, bool randVarPos = false) {
         int lhs, rhs;
         Operator op;
         do {
@@ -79,8 +101,17 @@ public class QuestionManager : MonoBehaviour {
             rhs = RandOperand(m_RhsRange);
             op = (opArg == null) ? RandOperator() : (Operator)opArg;
         } while (op == Operator.Div && (rhs == 0 || lhs % rhs != 0 || lhs <= rhs));
-        int answer = EvalQuestion(lhs, rhs, op);
-        return new(lhs, rhs, answer, op);
+        VarPos varPos = VarPos.Answer;
+        int answer = EvalEquation(new(lhs, rhs, 0, op, varPos));
+        if (randVarPos) {
+            varPos = (VarPos)UnityEngine.Random.Range(0, 3);
+            switch (varPos) {
+                case VarPos.Lhs: lhs = 0; break;
+                case VarPos.Rhs: rhs = 0; break;
+                case VarPos.Answer: answer = 0; break;
+            }
+        }
+        return new(lhs, rhs, answer, op, varPos);
     }
     void ShuffleAnswers() {
         System.Random random = new();
@@ -101,11 +132,11 @@ public class QuestionManager : MonoBehaviour {
         m_RhsRange = Vector2Int.RoundToInt((Vector2)m_RhsRange * m_Difficulty);
     }
     public void NewQuestion() {
-        Equation eq = GenEquation();
-        m_QuestionText.text = $"What is {FormatQuestion(eq.lhs, eq.rhs, eq.op)}?";
+        Equation eq = GenEquation(randVarPos: true);
+        m_QuestionText.text = $"Solve for x: {FormatEquation(eq)}";
         int answerCount = m_AnswerBoxes.Length > 0 ? m_AnswerBoxes.Length : throw new ArgumentException("AnswerBox reference(s) not provided.");
         m_Answers = new int[answerCount];
-        m_Answers[0] = m_Answer = eq.answer;
+        m_Answers[0] = m_Answer = EvalEquation(eq);
         for (int i = 1; i < answerCount; ++i) {
             m_Answers[i] = GenEquation(eq.op).answer;
         }
