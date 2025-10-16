@@ -3,43 +3,44 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour {
-    public int m_MaxHp = 3;
-    public Vector3 m_RespawnPoint = Vector3.zero;
-    public Text m_HealthText;
-    public Text m_DeathText;
-    public QuestionManager m_QuestionManager;
-    int m_Hp;
-    PlayerController m_Controller;
+    [SerializeField] int _maxHp = 3;
+    [SerializeField] Vector3 _respawnPoint = Vector3.zero;
+    [SerializeField] Text _healthText;
+    [SerializeField] Text _deathText;
+    [SerializeField] QuestionManager _questionManager;
+
+    int _hp;
+    PlayerController _controller;
 
     void Start() {
-        SetHp(m_MaxHp);
-        m_Controller = GetComponent<PlayerController>();
+        SetHp(_maxHp);
+        _controller = GetComponent<PlayerController>();
     }
     void UpdateHealthUI() {
-        m_HealthText.text = m_Hp + " HP";
+        _healthText.text = _hp + " HP";
     }
     void SetHp(int value) {
-        m_Hp = value;
+        _hp = value;
         UpdateHealthUI();
     }
     public void Damage(int dmg) {
-        SetHp(Mathf.Clamp(m_Hp - dmg, 0, m_MaxHp));
-        if (m_Hp <= 0) { Kill(); }
+        SetHp(Mathf.Clamp(_hp - dmg, 0, _maxHp));
+        if (_hp <= 0) { Kill(); }
     }
     public void Kill() {
-        if (m_Hp > 0) { SetHp(0); }
-        m_DeathText.gameObject.SetActive(true);
-        m_Controller.m_CaptureInput = false;
-        m_Controller.ResetPhysicsCache();
+        if (_hp > 0) { SetHp(0); }
+        _deathText.gameObject.SetActive(true);
+        _controller.captureInput = false;
+        _controller.ResetPhysicsCache();
         Invoke("Respawn", 1);
     }
     void Respawn() {
-        gameObject.transform.position = m_RespawnPoint;
+        gameObject.transform.position = _respawnPoint;
         gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-        m_Controller.m_CaptureInput = true;
-        m_DeathText.gameObject.SetActive(false);
-        m_QuestionManager.NewQuestion();
-        SetHp(m_MaxHp);
+        _controller.captureInput = true;
+        _deathText.gameObject.SetActive(false);
+        _questionManager.NewQuestion();
+        SetHp(_maxHp);
     }
     void Reload() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);

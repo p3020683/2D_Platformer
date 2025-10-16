@@ -2,17 +2,17 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour {
-    public Text m_ScoreText;
-    int m_Score;
+    [SerializeField] Text _scoreText;
+    int _score;
 
     void Start() {
         UpdateScoreUI();
     }
     public void AddScore(int amount) {
-        m_Score += amount;
+        _score += amount;
         UpdateScoreUI();
     }
     void UpdateScoreUI() {
-        m_ScoreText.text = "Score: " + m_Score;
+        _scoreText.text = "Score: " + _score;
     }
 }

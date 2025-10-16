@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class Coin : MonoBehaviour {
-    public int m_Value = 1;
+    [SerializeField] int _value = 1;
 
     private void OnTriggerEnter2D(Collider2D collision) {
         // Only trigger if the player touches the coin
@@ -10,7 +10,7 @@ public class Coin : MonoBehaviour {
             ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
 
             if (scoreManager != null) {
-                scoreManager.AddScore(m_Value);
+                scoreManager.AddScore(_value);
             }
 
             // Destroy the coin so it disappears

@@ -1,19 +1,19 @@
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
-    public float m_Speed = 10f;
-    public float m_Accel = 20f;
-    public float m_Drag = 5f;
-    public float m_JumpPwr = 5f;
-    public int m_JumpsMax = 2;
-    public float m_DashPwr = 40f;
-    public float m_DashCdMax = 1f;
-    [System.NonSerialized] public bool m_CaptureInput = true;
-
-    Rigidbody2D m_Rb;
-    PhysicsCache m_Phys;
-    int m_Jumps;
-    float m_DashCd;
+    [SerializeField] float _speed = 10f;
+    [SerializeField] float _accel = 20f;
+    [SerializeField] float _drag = 5f;
+    [SerializeField] float _jumpPwr = 5f;
+    [SerializeField] int _jumpsMax = 2;
+    [SerializeField] float _dashPwr = 40f;
+    [SerializeField] float _dashCdMax = 1f;
+    
+    [System.NonSerialized] public bool captureInput = true;
+    Rigidbody2D _rb;
+    PhysicsCache _phys;
+    int _jumps;
+    float _dashCd;
 
     struct PhysicsCache {
         public float xVel;
@@ -22,52 +22,52 @@ public class PlayerController : MonoBehaviour {
         public Vector2 knockback;
     }
 
-    public int Jumps { get => m_Jumps; }
-    public float DashCd { get => Mathf.Clamp(m_DashCdMax - m_DashCd, 0f, m_DashCdMax); }
-    public Vector2 Knockback { set => m_Phys.knockback = value; }
+    public int Jumps { get => _jumps; }
+    public float DashCd { get => Mathf.Clamp(_dashCdMax - _dashCd, 0f, _dashCdMax); }
+    public Vector2 Knockback { set => _phys.knockback = value; }
 
     void Start() {
-        m_Rb = GetComponent<Rigidbody2D>();
-        m_Jumps = m_JumpsMax;
+        _rb = GetComponent<Rigidbody2D>();
+        _jumps = _jumpsMax;
     }
     void FixedUpdate() {
-        m_Rb.AddForce(new((m_Phys.xVel * m_Speed - m_Rb.velocity.x) * m_Accel, 0f));
-        if (Mathf.Approximately(m_Phys.xVel, 0f)) {
-            m_Rb.velocity = new(Mathf.MoveTowards(m_Rb.velocity.x, 0f, m_Drag * Time.fixedDeltaTime), m_Rb.velocity.y);
+        _rb.AddForce(new((_phys.xVel * _speed - _rb.velocity.x) * _accel, 0f));
+        if (Mathf.Approximately(_phys.xVel, 0f)) {
+            _rb.velocity = new(Mathf.MoveTowards(_rb.velocity.x, 0f, _drag * Time.fixedDeltaTime), _rb.velocity.y);
         }
 
-        if (m_Phys.jump) {
-            if (m_Jumps > 0) {
-                m_Rb.velocity = new(m_Rb.velocity.x, Mathf.Max(m_JumpPwr, m_JumpPwr + m_Rb.velocity.y));
-                --m_Jumps;
+        if (_phys.jump) {
+            if (_jumps > 0) {
+                _rb.velocity = new(_rb.velocity.x, Mathf.Max(_jumpPwr, _jumpPwr + _rb.velocity.y));
+                --_jumps;
             }
-            m_Phys.jump = false;
+            _phys.jump = false;
         }
 
-        if ((m_DashCd <= 0 || (m_DashCd -= Time.fixedDeltaTime) <= 0) && m_Phys.sprint && m_Phys.xVel != 0) {
-            m_Rb.AddForce(new(m_DashPwr * Mathf.Sign(m_Phys.xVel) + m_Rb.velocity.x, 0f), ForceMode2D.Impulse);
-            m_DashCd = m_DashCdMax;
-            m_Phys.sprint = false;
+        if ((_dashCd <= 0 || (_dashCd -= Time.fixedDeltaTime) <= 0) && _phys.sprint && _phys.xVel != 0) {
+            _rb.AddForce(new(_dashPwr * Mathf.Sign(_phys.xVel) + _rb.velocity.x, 0f), ForceMode2D.Impulse);
+            _dashCd = _dashCdMax;
+            _phys.sprint = false;
         }
 
-        if (m_Phys.knockback != Vector2.zero) {
-            m_Rb.AddForce(new(m_Phys.knockback.x, Mathf.Clamp(m_Phys.knockback.y, -7.5f, 7.5f)), ForceMode2D.Impulse);
-            m_Phys.knockback = Vector2.zero;
+        if (_phys.knockback != Vector2.zero) {
+            _rb.AddForce(new(_phys.knockback.x, Mathf.Clamp(_phys.knockback.y, -7.5f, 7.5f)), ForceMode2D.Impulse);
+            _phys.knockback = Vector2.zero;
         }
     }
     void Update() {
-        if (m_CaptureInput) {
-            m_Phys.xVel = Input.GetAxisRaw("Horizontal");
-            if (Input.GetButtonDown("Jump")) { m_Phys.jump = true; }
-            if (Input.GetButtonDown("Sprint")) { m_Phys.sprint = true; }
+        if (captureInput) {
+            _phys.xVel = Input.GetAxisRaw("Horizontal");
+            if (Input.GetButtonDown("Jump")) { _phys.jump = true; }
+            if (Input.GetButtonDown("Sprint")) { _phys.sprint = true; }
         }
     }
     void OnCollisionEnter2D(Collision2D collision) {
-        if (m_Jumps < m_JumpsMax && collision.gameObject.CompareTag("Ground")) {
-            m_Jumps = m_JumpsMax;
+        if (_jumps < _jumpsMax && collision.gameObject.CompareTag("Ground")) {
+            _jumps = _jumpsMax;
         }
     }
     public void ResetPhysicsCache() {
-        m_Phys = new();
+        _phys = new();
     }
 }
