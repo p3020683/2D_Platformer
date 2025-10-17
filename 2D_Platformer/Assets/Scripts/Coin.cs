@@ -7,7 +7,7 @@ public class Coin : MonoBehaviour {
         // Only trigger if the player touches the coin
         if (collision.gameObject.CompareTag("Player")) {
             // Find the ScoreManager and add points
-            ScoreManager scoreManager = FindObjectOfType<ScoreManager>();
+            ScoreManager scoreManager = FindFirstObjectByType<ScoreManager>();
 
             if (scoreManager != null) {
                 scoreManager.AddScore(_value);

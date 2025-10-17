@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour {
     float _dashCd;
 
     struct PhysicsCache {
-        public float xVel;
+        public float velX;
         public bool jump;
         public bool sprint;
         public Vector2 knockback;
@@ -31,21 +31,21 @@ public class PlayerController : MonoBehaviour {
         _jumps = _jumpsMax;
     }
     void FixedUpdate() {
-        _rb.AddForce(new((_phys.xVel * _speed - _rb.linearVelocity.x) * _accel, 0f));
-        if (Mathf.Approximately(_phys.xVel, 0f)) {
-            _rb.linearVelocity = new(Mathf.MoveTowards(_rb.linearVelocity.x, 0f, _drag * Time.fixedDeltaTime), _rb.linearVelocity.y);
+        _rb.AddForceX((_phys.velX * _speed - _rb.linearVelocityX) * _accel);
+        if (Mathf.Approximately(_phys.velX, 0f)) {
+            _rb.linearVelocityX = Mathf.MoveTowards(_rb.linearVelocityX, 0f, _drag * Time.fixedDeltaTime);
         }
 
         if (_phys.jump) {
             if (_jumps > 0) {
-                _rb.linearVelocity = new(_rb.linearVelocity.x, Mathf.Max(_jumpPwr, _jumpPwr + _rb.linearVelocity.y));
+                _rb.linearVelocityY = Mathf.Max(_jumpPwr, _jumpPwr + _rb.linearVelocityY);
                 --_jumps;
             }
             _phys.jump = false;
         }
 
-        if ((_dashCd <= 0 || (_dashCd -= Time.fixedDeltaTime) <= 0) && _phys.sprint && _phys.xVel != 0) {
-            _rb.AddForce(new(_dashPwr * Mathf.Sign(_phys.xVel) + _rb.linearVelocity.x, 0f), ForceMode2D.Impulse);
+        if ((_dashCd <= 0 || (_dashCd -= Time.fixedDeltaTime) <= 0) && _phys.sprint && _phys.velX != 0) {
+            _rb.AddForceX(_dashPwr * Mathf.Sign(_phys.velX) + _rb.linearVelocityX, ForceMode2D.Impulse);
             _dashCd = _dashCdMax;
             _phys.sprint = false;
         }
@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour {
     }
     void Update() {
         if (captureInput) {
-            _phys.xVel = Input.GetAxisRaw("Horizontal");
+            _phys.velX = Input.GetAxisRaw("Horizontal");
             if (Input.GetButtonDown("Jump")) { _phys.jump = true; }
             if (Input.GetButtonDown("Sprint")) { _phys.sprint = true; }
         }
