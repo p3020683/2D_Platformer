@@ -31,21 +31,21 @@ public class PlayerController : MonoBehaviour {
         _jumps = _jumpsMax;
     }
     void FixedUpdate() {
-        _rb.AddForce(new((_phys.xVel * _speed - _rb.velocity.x) * _accel, 0f));
+        _rb.AddForce(new((_phys.xVel * _speed - _rb.linearVelocity.x) * _accel, 0f));
         if (Mathf.Approximately(_phys.xVel, 0f)) {
-            _rb.velocity = new(Mathf.MoveTowards(_rb.velocity.x, 0f, _drag * Time.fixedDeltaTime), _rb.velocity.y);
+            _rb.linearVelocity = new(Mathf.MoveTowards(_rb.linearVelocity.x, 0f, _drag * Time.fixedDeltaTime), _rb.linearVelocity.y);
         }
 
         if (_phys.jump) {
             if (_jumps > 0) {
-                _rb.velocity = new(_rb.velocity.x, Mathf.Max(_jumpPwr, _jumpPwr + _rb.velocity.y));
+                _rb.linearVelocity = new(_rb.linearVelocity.x, Mathf.Max(_jumpPwr, _jumpPwr + _rb.linearVelocity.y));
                 --_jumps;
             }
             _phys.jump = false;
         }
 
         if ((_dashCd <= 0 || (_dashCd -= Time.fixedDeltaTime) <= 0) && _phys.sprint && _phys.xVel != 0) {
-            _rb.AddForce(new(_dashPwr * Mathf.Sign(_phys.xVel) + _rb.velocity.x, 0f), ForceMode2D.Impulse);
+            _rb.AddForce(new(_dashPwr * Mathf.Sign(_phys.xVel) + _rb.linearVelocity.x, 0f), ForceMode2D.Impulse);
             _dashCd = _dashCdMax;
             _phys.sprint = false;
         }

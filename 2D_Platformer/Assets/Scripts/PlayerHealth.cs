@@ -36,7 +36,7 @@ public class PlayerHealth : MonoBehaviour {
     }
     void Respawn() {
         gameObject.transform.position = _respawnPoint;
-        gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        gameObject.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
         _controller.captureInput = true;
         _deathText.gameObject.SetActive(false);
         _questionManager.NewQuestion();
