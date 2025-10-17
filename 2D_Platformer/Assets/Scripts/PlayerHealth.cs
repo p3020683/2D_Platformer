@@ -1,12 +1,12 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour {
     [SerializeField] int _maxHp = 3;
     [SerializeField] Vector3 _respawnPoint = Vector3.zero;
-    [SerializeField] Text _healthText;
-    [SerializeField] Text _deathText;
+    [SerializeField] TMP_Text _healthText;
+    [SerializeField] TMP_Text _deathText;
     [SerializeField] QuestionManager _questionManager;
 
     int _hp;

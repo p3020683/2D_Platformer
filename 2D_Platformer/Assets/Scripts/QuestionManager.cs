@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 [Obsolete("Use newer EquationManager")]
 public class QuestionManager : MonoBehaviour {
@@ -8,7 +8,7 @@ public class QuestionManager : MonoBehaviour {
     [SerializeField] Vector2Int _rhsRange = new(1, 10);
     [SerializeField] OperatorFlags _opFlags = new(true, true, false, false);
     [SerializeField] GameObject[] _answerBoxes;
-    [SerializeField] Text _questionText;
+    [SerializeField] TMP_Text _questionText;
     [SerializeField] ScoreManager _scoreManager;
 
     [NonSerialized] public int answer;

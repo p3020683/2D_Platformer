@@ -1,8 +1,8 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class ScoreManager : MonoBehaviour {
-    [SerializeField] Text _scoreText;
+    [SerializeField] TMP_Text _scoreText;
     int _score;
 
     void Start() {
