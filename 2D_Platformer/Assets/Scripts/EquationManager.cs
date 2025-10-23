@@ -5,8 +5,15 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class EquationManager : MonoBehaviour {
-    System.Random rand;
+    System.Random rand = new();
 
+    void Start() {
+        for (int i = 0; i < 5; ++i) {
+            string eq = GenerateEquation();
+            double x = SolveForX(eq);
+            Debug.LogWarning($"{eq} => {x}");
+        }
+    }
     double SolveForX(string equation) {
         // split equation into left and right sides
         string[] parts = equation.Split('=');
@@ -50,9 +57,8 @@ public class EquationManager : MonoBehaviour {
         bool isX = includeX && rand.NextDouble() < 0.6;
         int coeff = rand.Next(1, 10);
         string term = isX ? $"{coeff}x" : $"{coeff}";
-        if (rand.Next(2) == 0)
-            return term;
-        return $"-{term}";
+        // 30% chance to be negative
+        return rand.NextDouble() < 0.3 ? $"-{term}" : term;
     }
 
     string RandomOperator() {
@@ -62,28 +68,28 @@ public class EquationManager : MonoBehaviour {
     string RandomExpression(bool forceX = true) {
         int termCount = rand.Next(2, 4);
         List<string> terms = new List<string>();
+        int xTerm = forceX ? rand.Next(termCount) : -1;
 
-        for (int i = 0; i < termCount; i++)
-            terms.Add(RandomTerm(includeX: i == 0 && forceX));
+        for (int i = 0; i < termCount; i++) {
+            terms.Add(RandomTerm(i == xTerm ? true : rand.Next(2) == 0));
+            Debug.Log($"terms[i:{i}]:{terms[i]}");
+        }
 
         string expr = string.Join(RandomOperator(), terms);
 
         // 30% chance to wrap in parentheses
-        if (rand.NextDouble() < 0.3)
-            expr = $"({expr})";
-
-        return expr;
+        return rand.NextDouble() < 0.3 ? $"({expr})" : expr;
     }
     string GenerateEquation() {
         // randomly choose whether x appears on both sides
         bool xBothSides = rand.NextDouble() < 0.3;
+        // occasionally make one side just a number
+        bool exprBothSides = !xBothSides && rand.NextDouble() < 0.6;
 
         string lhs = RandomExpression(forceX: true);
         string rhs = RandomExpression(forceX: xBothSides);
 
-        // occasionally make one side just a number
-        if (!xBothSides && rand.NextDouble() < 0.4)
-            rhs = rand.Next(-10, 25).ToString();
+        if (!exprBothSides) { rhs = rand.Next(-10, 25).ToString(); }
 
         return $"{lhs} = {rhs}";
     }
