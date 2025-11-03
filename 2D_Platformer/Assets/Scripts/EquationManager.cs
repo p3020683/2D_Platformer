@@ -7,13 +7,13 @@ using UnityEngine;
 public class EquationManager : MonoBehaviour {
     System.Random rand = new();
 
-    void Start() {
-        for (int i = 0; i < 5; ++i) {
-            string eq = GenerateEquation();
-            double x = SolveForX(eq);
-            Debug.LogWarning($"{eq} => {x}");
-        }
-    }
+    //void Start() {
+    //    for (int i = 0; i < 5; ++i) {
+    //        string eq = GenerateEquation();
+    //        double x = SolveForX(eq);
+    //        Debug.LogWarning($"{eq} => {x}");
+    //    }
+    //}
     double SolveForX(string equation) {
         // split equation into left and right sides
         string[] parts = equation.Split('=');

@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] int _jumpsMax = 2;
     [SerializeField] float _dashPwr = 40f;
     [SerializeField] float _dashCdMax = 1f;
-    
+
     [System.NonSerialized] public bool captureInput = true;
     Rigidbody2D _rb;
     PhysicsCache _phys;
@@ -63,10 +63,11 @@ public class PlayerController : MonoBehaviour {
         }
     }
     void OnCollisionEnter2D(Collision2D collision) {
-        if (_jumps < _jumpsMax && collision.gameObject.CompareTag("Ground")) {
-            _jumps = _jumpsMax;
-        }
+        if (collision.gameObject.CompareTag("Ground") && _jumps < _jumpsMax
+            || collision.gameObject.CompareTag("Hazard")) { _jumps = 0; }
     }
+    public void GroundColliderTriggerEnter() => _jumps = _jumpsMax;
+    public void GroundColliderTriggerExit() => _jumps -= _jumps == _jumpsMax ? 1 : 0;
     public void ResetPhysicsCache() {
         _phys = new();
     }
