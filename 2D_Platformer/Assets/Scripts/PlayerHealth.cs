@@ -1,23 +1,31 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour {
-    [SerializeField] int _maxHp = 3;
     [SerializeField] Vector3 _respawnPoint = Vector3.zero;
     [SerializeField] TMP_Text _healthText;
     [SerializeField] TMP_Text _deathText;
     [SerializeField] QuestionManager _questionManager;
+    [Header("NOTE: MaxHP is evaluated as\nhpImgs.Length * (hpStates.Length - 1)")]
+    [SerializeField] Image[] _hpImgs;
+    [SerializeField] Texture2D[] _hpStates;
 
-    int _hp;
+    int _hp, _maxHp;
     PlayerController _controller;
 
     void Start() {
+        _maxHp = _hpImgs.Length * (_hpStates.Length - 1);
         SetHp(_maxHp);
         _controller = GetComponent<PlayerController>();
     }
     void UpdateHealthUI() {
         _healthText.text = _hp + " HP";
+        // add hpimgs logic
+    }
+    void print<T>(T var) {
+        Debug.Log(var);
     }
     void SetHp(int value) {
         _hp = value;

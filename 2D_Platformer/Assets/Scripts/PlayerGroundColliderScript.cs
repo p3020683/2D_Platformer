@@ -3,14 +3,15 @@ using UnityEngine;
 public class PlayerGroundColliderScript : MonoBehaviour {
     [SerializeField] PlayerController _playerController;
 
-    void OnTriggerEnter2D(Collider2D collision) {
+    void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Ground")) {
-            _playerController.GroundColliderTriggerEnter();
+            _playerController.GroundColliderEnter();
         }
     }
-    void OnTriggerExit2D(Collider2D collision) {
+    void OnCollisionExit2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Ground")) {
-            _playerController.GroundColliderTriggerExit();
+            _playerController.GroundColliderExit();
         }
     }
+
 }
