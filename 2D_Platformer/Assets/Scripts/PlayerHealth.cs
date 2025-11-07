@@ -5,38 +5,45 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour {
     [SerializeField] Vector3 _respawnPoint = Vector3.zero;
-    [SerializeField] TMP_Text _healthText;
     [SerializeField] TMP_Text _deathText;
     [SerializeField] QuestionManager _questionManager;
     [Header("NOTE: MaxHP is evaluated as\nhpImgs.Length * (hpStates.Length - 1)")]
     [SerializeField] Image[] _hpImgs;
-    [SerializeField] Texture2D[] _hpStates;
+    [SerializeField] Texture2D[] _hpTexs;
 
+    Sprite[] _hpSprites;
+    int _stateCount;
     int _hp, _maxHp;
     PlayerController _controller;
 
+    public int Hp { get => _hp; private set { _hp = value; UpdateHealthUI(); } }
+
     void Start() {
-        _maxHp = _hpImgs.Length * (_hpStates.Length - 1);
-        SetHp(_maxHp);
+        _hpSprites = new Sprite[_hpTexs.Length];
+        for (int i = 0; i < _hpTexs.Length; i++) {
+            Texture2D tex = _hpTexs[i];
+            _hpSprites[i] = Sprite.Create(tex, new(0f, 0f, tex.width, tex.height), new(0.5f, 0.5f));
+        }
+
+        _stateCount = _hpSprites.Length - 1;
+        _maxHp = _hpImgs.Length * (_stateCount);
+        Hp = _maxHp;
+
         _controller = GetComponent<PlayerController>();
     }
     void UpdateHealthUI() {
-        _healthText.text = _hp + " HP";
-        // add hpimgs logic
-    }
-    void print<T>(T var) {
-        Debug.Log(var);
-    }
-    void SetHp(int value) {
-        _hp = value;
-        UpdateHealthUI();
+        for (int i = 0; i < _hpImgs.Length; i++) {
+            int hpMin = i * _stateCount;
+            int relHp = Mathf.Clamp(_hp - hpMin, 0, _stateCount);
+            _hpImgs[i].sprite = _hpSprites[relHp];
+        }
     }
     public void Damage(int dmg) {
-        SetHp(Mathf.Clamp(_hp - dmg, 0, _maxHp));
+        Hp = Mathf.Clamp(_hp - dmg, 0, _maxHp);
         if (_hp <= 0) { Kill(); }
     }
     public void Kill() {
-        if (_hp > 0) { SetHp(0); }
+        if (_hp > 0) { Hp = 0; }
         _deathText.gameObject.SetActive(true);
         _controller.captureInput = false;
         _controller.ResetPhysicsCache();
@@ -48,7 +55,7 @@ public class PlayerHealth : MonoBehaviour {
         _controller.captureInput = true;
         _deathText.gameObject.SetActive(false);
         _questionManager.NewQuestion();
-        SetHp(_maxHp);
+        Hp = _maxHp;
     }
     void Reload() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);

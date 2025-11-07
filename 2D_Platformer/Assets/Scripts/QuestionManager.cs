@@ -84,8 +84,8 @@ public class QuestionManager : MonoBehaviour {
         return op switch {
             Operator.Add => '+',
             Operator.Sub => '-',
-            Operator.Mul => '*',
-            Operator.Div => '/',
+            Operator.Mul => '×',
+            Operator.Div => '÷',
             _ => throw new Exception("Unexpected Operator value")
         };
     }
@@ -135,7 +135,7 @@ public class QuestionManager : MonoBehaviour {
     }
     public void NewQuestion() {
         Equation eq = GenEquation(randVarPos: true);
-        _questionText.text = $"Solve for x:\n{FormatEquation(eq)}";
+        _questionText.text = FormatEquation(eq);
         int answerCount = _answerBoxes.Length > 0 ? _answerBoxes.Length : throw new ArgumentException("AnswerBox reference(s) not provided.");
         _answers = new int[answerCount];
         _answers[0] = answer = EvalEquation(eq);
