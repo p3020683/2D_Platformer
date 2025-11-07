@@ -183,6 +183,7 @@ GameObject:
   - component: {fileID: 282598779}
   - component: {fileID: 282598778}
   - component: {fileID: 282598783}
+  - component: {fileID: 282598784}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -372,10 +373,32 @@ MonoBehaviour:
   - {fileID: 2018794017}
   - {fileID: 1864278277}
   - {fileID: 936235892}
-  _hpTexs:
+  _hpStates:
   - {fileID: 2800000, guid: fa62063bf2d39df41ac1533a57e60f1d, type: 3}
   - {fileID: 2800000, guid: 8c0a1b217f65963408b8bcff044f28f1, type: 3}
   - {fileID: 2800000, guid: 2714fe48b0b9f2f469bef33978ceec0e, type: 3}
+--- !u!95 &282598784
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282598777}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5040806c0607eef49886620d650c234d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &313743185
 GameObject:
   m_ObjectHideFlags: 0
@@ -2292,9 +2315,17 @@ Tilemap:
   m_TileAssetArray:
   - m_RefCount: 13
     m_Data: {fileID: 11400000, guid: e3c29693f1cd4794bbe993995955abd5, type: 2}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   m_TileSpriteArray:
   - m_RefCount: 13
     m_Data: {fileID: 199315195, guid: c2d5e8a501113e24e8ef974b9288fd67, type: 3}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   m_TileMatrixArray:
   - m_RefCount: 13
     m_Data:
@@ -2321,7 +2352,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -5, y: -1, z: 0}
-  m_Size: {x: 5, y: 13, z: 1}
+  m_Size: {x: 17, y: 13, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:

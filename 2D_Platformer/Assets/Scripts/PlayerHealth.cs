@@ -7,11 +7,11 @@ public class PlayerHealth : MonoBehaviour {
     [SerializeField] Vector3 _respawnPoint = Vector3.zero;
     [SerializeField] TMP_Text _deathText;
     [SerializeField] QuestionManager _questionManager;
-    [Header("NOTE: MaxHP is evaluated as\nhpImgs.Length * (hpStates.Length - 1)")]
+    [Header("NOTE: Max HP is evaluated as\nhpImgs.Length * (hpStates.Length - 1)")]
     [SerializeField] Image[] _hpImgs;
-    [SerializeField] Texture2D[] _hpTexs;
+    [SerializeField] Texture2D[] _hpStates;
 
-    Sprite[] _hpSprites;
+    Sprite[] _hpStateSprites;
     int _stateCount;
     int _hp, _maxHp;
     PlayerController _controller;
@@ -19,13 +19,13 @@ public class PlayerHealth : MonoBehaviour {
     public int Hp { get => _hp; private set { _hp = value; UpdateHealthUI(); } }
 
     void Start() {
-        _hpSprites = new Sprite[_hpTexs.Length];
-        for (int i = 0; i < _hpTexs.Length; i++) {
-            Texture2D tex = _hpTexs[i];
-            _hpSprites[i] = Sprite.Create(tex, new(0f, 0f, tex.width, tex.height), new(0.5f, 0.5f));
+        _hpStateSprites = new Sprite[_hpStates.Length];
+        for (int i = 0; i < _hpStates.Length; i++) {
+            Texture2D tex = _hpStates[i];
+            _hpStateSprites[i] = Sprite.Create(tex, new(0f, 0f, tex.width, tex.height), new(0.5f, 0.5f));
         }
 
-        _stateCount = _hpSprites.Length - 1;
+        _stateCount = _hpStateSprites.Length - 1;
         _maxHp = _hpImgs.Length * (_stateCount);
         Hp = _maxHp;
 
@@ -35,7 +35,7 @@ public class PlayerHealth : MonoBehaviour {
         for (int i = 0; i < _hpImgs.Length; i++) {
             int hpMin = i * _stateCount;
             int relHp = Mathf.Clamp(_hp - hpMin, 0, _stateCount);
-            _hpImgs[i].sprite = _hpSprites[relHp];
+            _hpImgs[i].sprite = _hpStateSprites[relHp];
         }
     }
     public void Damage(int dmg) {
