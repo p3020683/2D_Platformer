@@ -1,9 +1,9 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Answer : MonoBehaviour {
     [SerializeField] int _number = 0;
-    [SerializeField] Text _worldText;
+    [SerializeField] TMP_Text _text;
     [SerializeField] QuestionManager _questionManager;
 
     void Start() {
@@ -15,7 +15,7 @@ public class Answer : MonoBehaviour {
         }
     }
     void UpdateNumber() {
-        _worldText.text = _number.ToString();
+        _text.text = _number.ToString();
     }
     public void SetNumber(int number) {
         _number = number;

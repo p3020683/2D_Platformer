@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour {
     [SerializeField] Vector3 _respawnPoint = Vector3.zero;
-    [SerializeField] TMP_Text _deathText;
+    [SerializeField] TMP_Text _endText;
     [SerializeField] QuestionManager _questionManager;
     [Header("NOTE: Max HP is evaluated as\nhpImgs.Length * (hpStates.Length - 1)")]
     [SerializeField] Image[] _hpImgs;
@@ -44,20 +44,20 @@ public class PlayerHealth : MonoBehaviour {
     }
     public void Kill() {
         if (_hp > 0) { Hp = 0; }
-        _deathText.gameObject.SetActive(true);
+        _endText.text = "You Died!";
+        _endText.gameObject.SetActive(true);
         _controller.captureInput = false;
         _controller.ResetPhysicsCache();
-        Invoke("Respawn", 1);
     }
-    void Respawn() {
+    public void Respawn() {
         gameObject.transform.position = _respawnPoint;
         gameObject.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
         _controller.captureInput = true;
-        _deathText.gameObject.SetActive(false);
+        _endText.gameObject.SetActive(false);
         _questionManager.NewQuestion();
         Hp = _maxHp;
     }
-    void Reload() {
+    public void Restart() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

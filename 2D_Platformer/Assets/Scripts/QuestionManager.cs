@@ -4,14 +4,16 @@ using TMPro;
 
 [Obsolete("Use newer EquationManager")]
 public class QuestionManager : MonoBehaviour {
-    [SerializeField] Vector2Int _lhsRange = new(1, 10);
-    [SerializeField] Vector2Int _rhsRange = new(1, 10);
+    [SerializeField] Vector2Int _lhsBaseRange = new(1, 10);
+    [SerializeField] Vector2Int _rhsBaseRange = new(1, 10);
     [SerializeField] OperatorFlags _opFlags = new(true, true, false, false);
     [SerializeField] GameObject[] _answerBoxes;
     [SerializeField] TMP_Text _questionText;
     [SerializeField] ScoreManager _scoreManager;
 
     [NonSerialized] public int answer;
+    Vector2Int _lhsRange = new(1, 10);
+    Vector2Int _rhsRange = new(1, 10);
     int[] _answers;
     float _difficulty = 1;
 
@@ -129,9 +131,9 @@ public class QuestionManager : MonoBehaviour {
         }
     }
     void ApplyDifficulty(float diffDelta) {
-        _difficulty = Mathf.Clamp(_difficulty + diffDelta, 1, 5);
-        _lhsRange = Vector2Int.RoundToInt((Vector2)_lhsRange * _difficulty);
-        _rhsRange = Vector2Int.RoundToInt((Vector2)_rhsRange * _difficulty);
+        _difficulty = Mathf.Clamp(_difficulty + diffDelta, 1, 4);
+        _lhsRange = Vector2Int.RoundToInt((Vector2)_lhsBaseRange * _difficulty);
+        _rhsRange = Vector2Int.RoundToInt((Vector2)_rhsBaseRange * _difficulty);
     }
     public void NewQuestion() {
         Equation eq = GenEquation(randVarPos: true);
