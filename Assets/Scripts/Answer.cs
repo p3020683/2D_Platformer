@@ -2,22 +2,22 @@ using TMPro;
 using UnityEngine;
 
 public class Answer : MonoBehaviour {
-    [SerializeField] int _number = 0;
+    [SerializeField] float _number = 0f;
     [SerializeField] TMP_Text _text;
-    [SerializeField] QuestionManager _questionManager;
+    [SerializeField] EquationManager _equationManager;
 
     void Start() {
         UpdateNumber();
     }
     void OnTriggerEnter2D(Collider2D other) {
         if (other.gameObject.CompareTag("Player")) {
-            _questionManager.OnAnswer(_number);
+            _equationManager.OnAnswer(_number);
         }
     }
     void UpdateNumber() {
         _text.text = _number.ToString();
     }
-    public void SetNumber(int number) {
+    public void SetNumber(float number) {
         _number = number;
         UpdateNumber();
     }

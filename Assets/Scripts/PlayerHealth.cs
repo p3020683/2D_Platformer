@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class PlayerHealth : MonoBehaviour {
     [SerializeField] Vector3 _respawnPoint = Vector3.zero;
     [SerializeField] TMP_Text _endText;
-    [SerializeField] QuestionManager _questionManager;
+    [SerializeField] OldQuestionManager _questionManager;
     [Header("NOTE: Max HP is evaluated as\nhpImgs.Length * (hpStates.Length - 1)")]
     [SerializeField] Image[] _hpImgs;
     [SerializeField] Texture2D[] _hpStates;

@@ -1,96 +1,119 @@
-using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Text.RegularExpressions;
 using UnityEngine;
+using TMPro;
 
 public class EquationManager : MonoBehaviour {
-    System.Random rand = new();
+    [SerializeField] private TMP_Text _equationText;
+    [SerializeField] private ScoreManager _scoreManager;
+    [SerializeField] private EquationStore _equationStore;
+    [SerializeField] private GameObject[] _answerBoxes;
 
-    //void Start() {
-    //    for (int i = 0; i < 5; ++i) {
-    //        string eq = GenerateEquation();
-    //        double x = SolveForX(eq);
-    //        Debug.LogWarning($"{eq} => {x}");
-    //    }
-    //}
-    double SolveForX(string equation) {
-        // split equation into left and right sides
-        string[] parts = equation.Split('=');
-        if (parts.Length != 2) {
-            throw new ArgumentException("Equation must have one '=' sign.");
+    List<float> _answers = new();
+    private float _correctAnswer;
+
+    void Start() {
+        StartCoroutine(DelayedStart());
+    }
+    System.Collections.IEnumerator DelayedStart() {
+        while (!_equationStore.IsReady) { yield return null; }
+        NewQuestion();
+    }
+    public void NewQuestion() {
+        EquationStore.EquationEntry entry = _equationStore.GetRandomEquation();
+        _equationText.text = entry.equation;
+
+        // if loading failed or ran out of data
+        if (float.IsNaN(entry.solution)) {
+            AssignFallbackAnswers();
+            return;
         }
 
-        string lhs = parts[0].Trim();
-        string rhs = parts[1].Trim();
+        _correctAnswer = Mathf.Round(entry.solution * 100f) / 100f;
 
-        // insert explicit multiplication operators
-        lhs = Regex.Replace(lhs, @"(\d+)x", "$1*x");
-        lhs = Regex.Replace(lhs, @"(\d+)\(", "$1*(");
-
-        rhs = Regex.Replace(rhs, @"(\d+)x", "$1*x");
-        rhs = Regex.Replace(rhs, @"(\d+)\(", "$1*(");
-
-        // evaluate constant parts and find coefficients of expressions
-        double lhsConst = Evaluate(lhs.Replace('x', '0'));
-        double lhsWithX1 = Evaluate(lhs.Replace('x', '1'));
-        double lhsCoeff = lhsWithX1 - lhsConst;
-
-        double rhsConst = Evaluate(rhs.Replace('x', '0'));
-        double rhsWithX1 = Evaluate(rhs.Replace('x', '1'));
-        double rhsCoeff = rhsWithX1 - rhsConst;
-
-        // calculate net constant part and coefficient of equation
-        double netConst = rhsConst - lhsConst;
-        double netCoeff = lhsCoeff - rhsCoeff;
-        if (Math.Abs(netCoeff) < 1e-9) {
-            throw new InvalidOperationException("Equation does not contain a valid x term.");
-        }
-        return Math.Round(netConst / netCoeff, 2);
-
-        static double Evaluate(string expr) {
-            return Convert.ToDouble(new DataTable().Compute(expr, ""));
-        }
+        PrepareAnswers(_correctAnswer);
+        ShuffleAnswers();
+        AssignAnswersToBoxes();
     }
-    string RandomTerm(bool includeX = true) {
-        // 60% chance of x-term, 40% constant
-        bool isX = includeX && rand.NextDouble() < 0.6;
-        int coeff = rand.Next(1, 10);
-        string term = isX ? $"{coeff}x" : $"{coeff}";
-        // 30% chance to be negative
-        return rand.NextDouble() < 0.3 ? $"-{term}" : term;
-    }
-
-    string RandomOperator() {
-        string[] ops = { " + ", " - ", " * ", " / " };
-        return ops[rand.Next(ops.Length)];
-    }
-    string RandomExpression(bool forceX = true) {
-        int termCount = rand.Next(2, 4);
-        List<string> terms = new List<string>();
-        int xTerm = forceX ? rand.Next(termCount) : -1;
-
-        for (int i = 0; i < termCount; i++) {
-            terms.Add(RandomTerm(i == xTerm ? true : rand.Next(2) == 0));
-            Debug.Log($"terms[i:{i}]:{terms[i]}");
+    void PrepareAnswers(float correct) {
+        if (float.IsNaN(correct)) {
+            AssignFallbackAnswers();
+            return;
         }
 
-        string expr = string.Join(RandomOperator(), terms);
+        _answers.Clear();
+        _answers.Add(correct);
+        int answerCount = _answerBoxes.Length;
 
-        // 30% chance to wrap in parentheses
-        return rand.NextDouble() < 0.3 ? $"({expr})" : expr;
+        bool isInt = Mathf.Approximately(correct, Mathf.Round(correct));
+        int intCorrect = Mathf.RoundToInt(correct);
+
+        int attempts = 0;
+        while (_answers.Count < answerCount && attempts++ < 200) {
+            float cand;
+
+            if (isInt) {
+                // use integer offsets if correct is int
+                int offset = Random.Range(-10, 11);
+                if (offset == 0) { continue; }
+
+                cand = intCorrect + offset;
+            }
+            else {
+                // float offset between -5.00 and +5.00, rounded to 2dp
+                float offset = Mathf.Round(Random.Range(-5f, 5f) * 100f) / 100f;
+                if (Mathf.Approximately(offset, 0f)) { continue; }
+
+                cand = correct + offset;
+                cand = Mathf.Round(cand * 100f) / 100f;
+            }
+
+            if (!_answers.Contains(cand)) { _answers.Add(cand); }
+        }
+
+        // fallback just in case decoys are somehow still insufficient
+        while (_answers.Count < answerCount) {
+            float cand;
+            if (isInt) {
+                cand = intCorrect + Random.Range(-20, 21);
+            }
+            else {
+                cand = correct + Random.Range(-10f, 10f);
+                cand = Mathf.Round(cand * 100f) / 100f;
+            }
+            if (!_answers.Contains(cand)) { _answers.Add(cand); }
+        }
     }
-    string GenerateEquation() {
-        // randomly choose whether x appears on both sides
-        bool xBothSides = rand.NextDouble() < 0.3;
-        // occasionally make one side just a number
-        bool exprBothSides = !xBothSides && rand.NextDouble() < 0.6;
+    void ShuffleAnswers() {
+        System.Random rng = new System.Random();
+        int n = _answers.Count;
 
-        string lhs = RandomExpression(forceX: true);
-        string rhs = RandomExpression(forceX: xBothSides);
+        while (n > 1) {
+            int k = rng.Next(n--);
+            float temp = _answers[n];
+            _answers[n] = _answers[k];
+            _answers[k] = temp;
+        }
+    }    
+    void AssignAnswersToBoxes() {
+        for (int i = 0; i < _answerBoxes.Length; i++) {
+            var ansComp = _answerBoxes[i].GetComponent<Answer>();
+            ansComp.SetNumber(_answers[i]);  // assumes SetNumber(float)
+        }
+    }
+    void AssignFallbackAnswers() {
+        _answers.Clear();
+        _answers.Add(0f);
 
-        if (!exprBothSides) { rhs = rand.Next(-10, 25).ToString(); }
-
-        return $"{lhs} = {rhs}";
+        for (int i = 1; i < _answerBoxes.Length; i++) {
+            _answers.Add(0f);
+        }
+        ShuffleAnswers();
+        AssignAnswersToBoxes();
+    }
+    public void OnAnswer(float chosen) {  // callback from answer boxes
+        bool correct = Mathf.Approximately(chosen, _correctAnswer);
+        int scoreDelta = correct ? 2 : -1;
+        _scoreManager.AddScore(scoreDelta);
+        NewQuestion();
     }
 }

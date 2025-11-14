@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour {
         _rb = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _anim = GetComponent<Animator>();
-        _abil.MaxJumps = 2; _abil.CanWallJump = true;  // debug values
+        _abil.MaxJumps = 1;
         Grounded = true;
     }
     void FixedUpdate() {
@@ -111,9 +111,7 @@ public class PlayerController : MonoBehaviour {
         if (!Grounded) {
             if (collision.gameObject.CompareTag("Ground")) { _jumps = 0; }
             else if (collision.gameObject.CompareTag("WallJump")) {
-                Debug.Log("WallJump Contact");
                 if ( _abil.CanWallJump && !_wallJumped) {
-                    Debug.Log("wallJump");
                     _jumps = 1;
                     _wallJumped = true;
                     _updateSpriteFlipX = false;
@@ -133,4 +131,8 @@ public class PlayerController : MonoBehaviour {
     public void GroundColliderEnter() => Grounded = true;
     public void GroundColliderExit() => _jumps -= Grounded ? _abil.MaxJumps - 1 : 0;
     public void ResetPhysicsCache() => _phys = new();
+    // ---  ability unlock methods ---
+    public void IncrementMaxJumps() => _abil.MaxJumps += _abil.MaxJumps < 4 ? 1 : 0;
+    public void DecrementDashCd() => _abil.DashCd -= _abil.DashCd == 0 ? -2f : _abil.DashCd < 0.5f ? 0f : 0.1f;
+    public void UnlockCanWallJump() => _abil.CanWallJump = true;
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 using TMPro;
 
 [Obsolete("Use newer EquationManager")]
-public class QuestionManager : MonoBehaviour {
+public class OldQuestionManager : MonoBehaviour {
     [SerializeField] Vector2Int _lhsBaseRange = new(1, 10);
     [SerializeField] Vector2Int _rhsBaseRange = new(1, 10);
     [SerializeField] OperatorFlags _opFlags = new(true, true, false, false);
