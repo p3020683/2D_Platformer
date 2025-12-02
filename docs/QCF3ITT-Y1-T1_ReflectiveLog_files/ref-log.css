@@ -1,0 +1,14 @@
+/*
+  for use in webpage-exported excel spreadsheets
+  to make evidence/images fit inside their cells
+  without affecting document flow or overflowing
+*/
+
+img {
+  max-height: 100%;
+  max-width: 100%;
+  position: absolute;
+}
+td {
+  position: relative;
+}
